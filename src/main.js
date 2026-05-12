@@ -6,8 +6,12 @@ import { Capacitor } from '@capacitor/core';
 const startBtn = document.getElementById('start-btn');
 const statusText = document.getElementById('status-text');
 const countdown = document.getElementById('countdown');
+const modeSelect = document.getElementById('mode');
+const intervalContainer = document.getElementById('interval-container');
+const specificTimeContainer = document.getElementById('specific-time-container');
 const intervalInput = document.getElementById('interval');
 const intervalVal = document.getElementById('interval-val');
+const specificTimeInput = document.getElementById('specific-time');
 const vibrationSelect = document.getElementById('vibration');
 const customVibrationContainer = document.getElementById('custom-vibration-container');
 const customVibrationInput = document.getElementById('custom-vibration');
@@ -23,29 +27,36 @@ if ('serviceWorker' in navigator && !Capacitor.isNativePlatform()) {
     .catch((err) => console.error('Service Worker registration failed', err));
 }
 
-// Handle notification actions (when user clicks notification)
+// Handle notification actions
 LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
   console.log('Notification action performed', notification);
   stopTimer(); 
 });
 
-// Handle notification received (when app is in foreground)
+// Handle notification received in foreground
 LocalNotifications.addListener('localNotificationReceived', (notification) => {
   console.log('Notification received in foreground', notification);
   triggerHapticPattern(getVibrationPattern());
-  // We don't call stopTimer() immediately so the user can see the "00:00:00" state
 });
 
 // Restore UI State
 window.addEventListener('load', async () => {
   const isRunning = localStorage.getItem('isTimerRunning') === 'true';
   const savedEndTime = parseInt(localStorage.getItem('endTime'));
+  const savedMode = localStorage.getItem('mode') || 'interval';
   const savedInterval = localStorage.getItem('interval');
+  const savedSpecificTime = localStorage.getItem('specificTime');
   const savedVibration = localStorage.getItem('vibration');
+
+  modeSelect.value = savedMode;
+  updateModeUI(savedMode);
 
   if (savedInterval) {
     intervalInput.value = savedInterval;
     intervalVal.textContent = `${savedInterval}h`;
+  }
+  if (savedSpecificTime) {
+    specificTimeInput.value = savedSpecificTime;
   }
   if (savedVibration) {
     vibrationSelect.value = savedVibration;
@@ -60,10 +71,29 @@ window.addEventListener('load', async () => {
   }
 });
 
-// Update interval value display
+modeSelect.addEventListener('change', () => {
+  const mode = modeSelect.value;
+  localStorage.setItem('mode', mode);
+  updateModeUI(mode);
+});
+
+function updateModeUI(mode) {
+  if (mode === 'interval') {
+    intervalContainer.classList.remove('hidden');
+    specificTimeContainer.classList.add('hidden');
+  } else {
+    intervalContainer.classList.add('hidden');
+    specificTimeContainer.classList.remove('hidden');
+  }
+}
+
 intervalInput.addEventListener('input', () => {
   intervalVal.textContent = `${intervalInput.value}h`;
   localStorage.setItem('interval', intervalInput.value);
+});
+
+specificTimeInput.addEventListener('change', () => {
+  localStorage.setItem('specificTime', specificTimeInput.value);
 });
 
 vibrationSelect.addEventListener('change', () => {
@@ -91,8 +121,30 @@ startBtn.addEventListener('click', async () => {
     return;
   }
 
-  const hours = parseInt(intervalInput.value);
-  const durationMs = hours * 60 * 60 * 1000;
+  const mode = modeSelect.value;
+  let durationMs = 0;
+
+  if (mode === 'interval') {
+    const hours = parseInt(intervalInput.value);
+    durationMs = hours * 60 * 60 * 1000;
+  } else {
+    const timeVal = specificTimeInput.value; // "HH:MM"
+    if (!timeVal) {
+      alert('Please select a valid time!');
+      return;
+    }
+    const [hours, minutes] = timeVal.split(':').map(Number);
+    const now = new Date();
+    const scheduledTime = new Date();
+    scheduledTime.setHours(hours, minutes, 0, 0);
+
+    if (scheduledTime <= now) {
+      // If time has passed today, schedule for tomorrow
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
+    durationMs = scheduledTime.getTime() - now.getTime();
+  }
+
   endTime = Date.now() + durationMs;
 
   localStorage.setItem('isTimerRunning', 'true');
@@ -111,7 +163,6 @@ async function scheduleNativeNotification(delayMs) {
         body: 'Time to check in with Claude!',
         id: 1,
         schedule: { at: new Date(Date.now() + delayMs) },
-        vibration: getVibrationPattern(), // For Android native support if available
       }
     ]
   });
@@ -154,7 +205,6 @@ function updateCountdown() {
     statusText.textContent = 'Notification sent!';
     countdown.textContent = '00:00:00';
     
-    // Trigger the haptic pattern if the app is foregrounded
     triggerHapticPattern(getVibrationPattern());
     return;
   }
@@ -170,10 +220,6 @@ function pad(num) {
   return num.toString().padStart(2, '0');
 }
 
-/**
- * Manually trigger a vibration pattern using the Haptics plugin.
- * Since @capacitor/haptics doesn't support patterns directly, we pulse it.
- */
 async function triggerHapticPattern(pattern) {
   if (!pattern || pattern.length === 0) {
     await Haptics.vibrate();
@@ -183,16 +229,8 @@ async function triggerHapticPattern(pattern) {
   for (let i = 0; i < pattern.length; i++) {
     const duration = pattern[i];
     if (i % 2 === 0) {
-      // Vibrate
-      if (Capacitor.getPlatform() === 'android') {
-        // Android vibrate() uses default duration, we can't easily specify ms 
-        // with the standard plugin, but we can call it.
-        await Haptics.vibrate();
-      } else {
-        await Haptics.vibrate({ duration });
-      }
+      await Haptics.vibrate();
     }
-    // Wait for the duration (either vibrate or pause)
     await new Promise(resolve => setTimeout(resolve, duration));
   }
 }
@@ -202,7 +240,7 @@ function getVibrationPattern() {
   switch (type) {
     case 'short': return [100];
     case 'long': return [500];
-    case 'triple': return [100, 100, 100, 100, 100]; // Vibrate, Pause, Vibrate, Pause, Vibrate
+    case 'triple': return [100, 100, 100, 100, 100];
     case 'custom':
       const val = customVibrationInput.value;
       if (!val) return [200, 100, 200];

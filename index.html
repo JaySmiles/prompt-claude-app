@@ -37,9 +37,22 @@
           <h2>Settings</h2>
           
           <div class="setting-item">
+            <label for="mode">Reminder Mode</label>
+            <select id="mode">
+              <option value="interval">Interval (Countdown)</option>
+              <option value="specific">Specific Time (Daily)</option>
+            </select>
+          </div>
+
+          <div id="interval-container" class="setting-item">
             <label for="interval">Interval (hours)</label>
             <input type="range" id="interval" min="1" max="24" value="5" step="1" />
             <span id="interval-val">5h</span>
+          </div>
+
+          <div id="specific-time-container" class="setting-item hidden">
+            <label for="specific-time">Notification Time</label>
+            <input type="time" id="specific-time" value="09:00" />
           </div>
 
           <div class="setting-item">
