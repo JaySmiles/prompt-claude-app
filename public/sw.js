@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prompt-claude-v2';
+const CACHE_NAME = 'prompt-claude-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -45,79 +45,5 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Logic for persistent notifications
-let nagInterval = null;
-let mainTimer = null;
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  stopAllNagging();
-  
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url === '/' && 'focus' in client) return client.focus();
-      }
-      if (clients.openWindow) return clients.openWindow('/');
-    })
-  );
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data.action === 'scheduleNotification') {
-    const { delay, pattern } = event.data;
-    
-    // Clear any existing timers first (Fixes Zombie bug)
-    stopAllNagging();
-
-    mainTimer = setTimeout(() => {
-      showNotification(pattern);
-    }, delay);
-  }
-
-  if (event.data.action === 'cancelNotification') {
-    stopAllNagging();
-  }
-});
-
-function stopAllNagging() {
-  if (mainTimer) {
-    clearTimeout(mainTimer);
-    mainTimer = null;
-  }
-  if (nagInterval) {
-    clearInterval(nagInterval);
-    nagInterval = null;
-  }
-}
-
-async function showNotification(pattern) {
-  const options = {
-    body: 'Prompt Claude',
-    icon: '/logo.png',
-    vibrate: pattern || [200, 100, 200],
-    tag: 'prompt-claude-reminder',
-    renotify: true,
-    requireInteraction: true,
-    actions: [
-      { action: 'interact', title: 'I did it!' }
-    ]
-  };
-
-  await self.registration.showNotification('Prompt Claude!', options);
-
-  // Start nagging every 10 minutes if not already nagging
-  if (!nagInterval) {
-    nagInterval = setInterval(async () => {
-      await self.registration.showNotification('Prompt Claude!', {
-        ...options,
-        body: 'Prompt Claude (STILL WAITING)',
-        vibrate: options.vibrate,
-      });
-    }, 10 * 60 * 1000); // 10 minutes
-  }
-}
-
-self.addEventListener('notificationclose', (event) => {
-  // We keep nagging until they click or interact
-});
+// Primary notification logic has been moved to native Capacitor LocalNotifications plugin
+// in src/main.js for better reliability on Android.
