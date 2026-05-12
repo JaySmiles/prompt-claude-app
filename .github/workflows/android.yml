@@ -28,8 +28,9 @@ jobs:
 
     - name: Capacitor Sync
       run: |
-        npx cap add android
-        npx cap sync
+        npx cap add android || true
+        npx cap sync android
+        ls -d android
 
     - name: set up JDK 17
       uses: actions/setup-java@v4
