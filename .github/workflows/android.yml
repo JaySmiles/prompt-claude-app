@@ -34,7 +34,9 @@ jobs:
       run: npm run build
 
     - name: Capacitor Sync
-      run: npx cap sync
+      run: |
+        npx cap add android
+        npx cap sync
 
     - name: Build Android App (APK)
       run: |
