@@ -44,9 +44,7 @@ jobs:
         cp -r resources/android/* android/app/src/main/res/
 
     - name: Patch Android Manifest
-      run: |
-        sed -i '/<manifest/a \    <uses-permission android:name="android.permission.VIBRATE" />' android/app/src/main/AndroidManifest.xml
-        sed -i '/<manifest/a \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' android/app/src/main/AndroidManifest.xml
+      run: node scripts/patch_manifest.js
 
     - name: Build Android App (APK)
       run: |

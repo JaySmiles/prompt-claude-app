@@ -67,7 +67,10 @@ window.addEventListener('load', async () => {
     endTime = savedEndTime;
     startTimerUI();
   } else if (isRunning) {
-    stopTimer();
+    localStorage.setItem('isTimerRunning', 'false');
+    startBtn.querySelector('.btn-text').textContent = 'Start Reminder';
+    statusText.textContent = 'Notification sent!';
+    countdown.classList.add('hidden');
   }
 });
 
@@ -229,7 +232,7 @@ async function triggerHapticPattern(pattern) {
   for (let i = 0; i < pattern.length; i++) {
     const duration = pattern[i];
     if (i % 2 === 0) {
-      await Haptics.vibrate();
+      await Haptics.vibrate({ duration });
     }
     await new Promise(resolve => setTimeout(resolve, duration));
   }
