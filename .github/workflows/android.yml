@@ -39,6 +39,10 @@ jobs:
         npx cap add android || true
         npx cap sync android
 
+    - name: Apply Custom App Icons
+      run: |
+        cp -r resources/android/* android/app/src/main/res/
+
     - name: Patch Android Manifest
       run: |
         sed -i '/<manifest/a \    <uses-permission android:name="android.permission.VIBRATE" />' android/app/src/main/AndroidManifest.xml
