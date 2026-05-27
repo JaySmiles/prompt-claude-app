@@ -23,10 +23,21 @@ index 0b826a5..cc63c49 100644
              triggerScheduledNotification(buildNotification, localNotification);
          } else {
 diff --git a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
-index b2ea880..e2c514d 100644
+index b2ea880..cc3532a 100644
 --- a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
 +++ b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
-@@ -79,6 +79,21 @@ public class NotificationChannelManager {
+@@ -62,6 +62,10 @@ public class NotificationChannelManager {
+             channel.put(CHANNEL_VIBRATE, call.getBoolean(CHANNEL_VIBRATE, false));
+             channel.put(CHANNEL_USE_LIGHTS, call.getBoolean(CHANNEL_USE_LIGHTS, false));
+             channel.put(CHANNEL_LIGHT_COLOR, call.getString(CHANNEL_LIGHT_COLOR, null));
++            JSArray vibrationPattern = call.getArray("vibrationPattern");
++            if (vibrationPattern != null) {
++                channel.put("vibrationPattern", vibrationPattern);
++            }
+             createChannel(channel);
+             call.resolve();
+         } else {
+@@ -79,6 +83,21 @@ public class NotificationChannelManager {
              notificationChannel.setDescription(channel.getString(CHANNEL_DESCRIPTION));
              notificationChannel.setLockscreenVisibility(channel.getInteger(CHANNEL_VISIBILITY));
              notificationChannel.enableVibration(channel.getBool(CHANNEL_VIBRATE));
