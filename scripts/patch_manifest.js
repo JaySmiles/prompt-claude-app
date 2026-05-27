@@ -12,7 +12,8 @@ let manifest = fs.readFileSync(manifestPath, 'utf8');
 
 const permissions = [
   'android.permission.VIBRATE',
-  'android.permission.POST_NOTIFICATIONS'
+  'android.permission.POST_NOTIFICATIONS',
+  'android.permission.USE_EXACT_ALARM'
 ];
 
 let updated = false;
