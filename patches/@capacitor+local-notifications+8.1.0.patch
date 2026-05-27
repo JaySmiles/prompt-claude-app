@@ -1,7 +1,19 @@
 diff --git a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
-index 0b826a5..5fe9cf6 100644
+index 0b826a5..cc63c49 100644
 --- a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
 +++ b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
+@@ -198,9 +198,9 @@ public class LocalNotificationManager {
+             // Grant permission to use sound
+             context.grantUriPermission("com.android.systemui", soundUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+             mBuilder.setSound(soundUri);
+-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
++            mBuilder.setDefaults(Notification.DEFAULT_LIGHTS);
+         } else {
+-            mBuilder.setDefaults(Notification.DEFAULT_ALL);
++            mBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS);
+         }
+ 
+         String group = localNotification.getGroup();
 @@ -232,6 +232,7 @@ public class LocalNotificationManager {
          createActionIntents(localNotification, mBuilder);
          // notificationId is a unique int for each localNotification that you must define
