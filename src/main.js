@@ -154,17 +154,39 @@ startBtn.addEventListener('click', async () => {
   localStorage.setItem('endTime', endTime.toString());
   localStorage.setItem('vibrationPattern', JSON.stringify(getVibrationPattern()));
 
-  startTimerUI();
-  await scheduleNativeNotification(durationMs);
-});
+  const pattern = getVibrationPattern();
+  const channelId = 'vibrate_' + pattern.join('_');
 
-async function scheduleNativeNotification(delayMs) {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await LocalNotifications.createChannel({
+        id: channelId,
+        name: 'Timer Notifications',
+        description: 'Timer and reminders',
+        importance: 4, // 4 = HIGH
+        vibration: true,
+        vibrationPattern: pattern
+      });
+    } catch (e) {
+      console.warn('Failed to create notification channel:', e);
+    }
+  }
+
+  startTimerUI();
+  await scheduleNativeNotification(durationMs, channelId);
+  // If running in a web/PWA context, also schedule a notification via the Service Worker
+  if (!Capacitor.isNativePlatform()) {
+    navigator.serviceWorker.controller?.postMessage({ type: 'schedule', delay: durationMs });
+  }});
+
+async function scheduleNativeNotification(delayMs, channelId) {
   await LocalNotifications.schedule({
     notifications: [
       {
         title: 'Prompt Claude!',
         body: 'Time to check in with Claude!',
         id: 1,
+        channelId: channelId,
         schedule: { at: new Date(Date.now() + delayMs) },
       }
     ]
@@ -194,7 +216,10 @@ async function stopTimer() {
   countdown.classList.add('hidden');
 
   await cancelNativeNotifications();
-}
+    // If running in web/PWA, also inform Service Worker to cancel scheduled notification
+    if (!Capacitor.isNativePlatform()) {
+      navigator.serviceWorker.controller?.postMessage({ type: 'cancel' });
+    }}
 
 function updateCountdown() {
   const now = Date.now();
