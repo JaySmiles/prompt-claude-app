@@ -1,5 +1,5 @@
 diff --git a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
-index b2ea880..617b6a5 100644
+index b2ea880..e2c514d 100644
 --- a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
 +++ b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
 @@ -79,6 +79,21 @@ public class NotificationChannelManager {
@@ -8,7 +8,7 @@ index b2ea880..617b6a5 100644
              notificationChannel.enableVibration(channel.getBool(CHANNEL_VIBRATE));
 +            
 +            try {
-+                JSArray patternArray = channel.optJSONArray("vibrationPattern");
++                org.json.JSONArray patternArray = channel.optJSONArray("vibrationPattern");
 +                if (patternArray != null && patternArray.length() > 0) {
 +                    long[] pattern = new long[patternArray.length()];
 +                    for (int i = 0; i < patternArray.length(); i++) {
