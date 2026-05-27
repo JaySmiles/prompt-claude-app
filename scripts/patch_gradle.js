@@ -29,8 +29,8 @@ if (!content.includes('signingConfigs {')) {
 }
 
 if (!content.includes('signingConfig signingConfigs.release')) {
-  content = content.replace(/release\s*\{/, "release {\n            signingConfig signingConfigs.release");
-  content = content.replace(/debug\s*\{/, "debug {\n            signingConfig signingConfigs.release");
+  content = content.replace(/buildTypes\s*\{/, "buildTypes {\n        debug {\n            signingConfig signingConfigs.release\n        }");
+  content = content.replace(/buildTypes\s*\{\s*debug\s*\{\s*signingConfig signingConfigs\.release\s*\}\s*release\s*\{/, "buildTypes {\n        debug {\n            signingConfig signingConfigs.release\n        }\n        release {\n            signingConfig signingConfigs.release");
 }
 
 fs.writeFileSync(gradlePath, content);
