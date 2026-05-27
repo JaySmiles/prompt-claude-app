@@ -1,3 +1,15 @@
+diff --git a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
+index 0b826a5..5fe9cf6 100644
+--- a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
++++ b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/LocalNotificationManager.java
+@@ -232,6 +232,7 @@ public class LocalNotificationManager {
+         createActionIntents(localNotification, mBuilder);
+         // notificationId is a unique int for each localNotification that you must define
+         Notification buildNotification = mBuilder.build();
++        buildNotification.flags |= Notification.FLAG_INSISTENT;
+         if (localNotification.isScheduled()) {
+             triggerScheduledNotification(buildNotification, localNotification);
+         } else {
 diff --git a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java b/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
 index b2ea880..e2c514d 100644
 --- a/node_modules/@capacitor/local-notifications/android/src/main/java/com/capacitorjs/plugins/localnotifications/NotificationChannelManager.java
