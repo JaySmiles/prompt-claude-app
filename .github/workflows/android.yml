@@ -39,21 +39,27 @@ jobs:
         npx cap add android || true
         npx cap sync android
 
-    - name: Apply Custom App Icons
+    - name: Apply Custom App Icons & Keystore
       run: |
         cp -r resources/android/* android/app/src/main/res/
+        cp resources/android/prompt-claude.keystore android/app/
 
-    - name: Patch Android Manifest
-      run: node scripts/patch_manifest.js
+    - name: Patch Android Manifest & Build Config
+      run: |
+        node scripts/patch_manifest.js
+        node scripts/patch_gradle.js
 
     - name: Build Android App (APK)
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug assembleRelease
 
-    - name: Upload APK
+    - name: Upload APKs
       uses: actions/upload-artifact@v4
       with:
         name: prompt-claude-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        path: |
+          android/app/build/outputs/apk/debug/app-debug.apk
+          android/app/build/outputs/apk/release/app-release-unsigned.apk
+          android/app/build/outputs/apk/release/app-release.apk

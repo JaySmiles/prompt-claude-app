@@ -19,6 +19,7 @@
     "@capacitor/cli": "^8.3.3",
     "@capacitor/core": "^8.3.3",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/local-notifications": "^8.1.0"
+    "@capacitor/local-notifications": "^8.1.0",
+    "node-forge": "^1.4.0"
   }
 }
